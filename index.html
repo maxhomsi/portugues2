@@ -1,123 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Cursiva PT-BR — Aprenda Traçando</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aprendendo Cursiva</title>
+  <link rel="stylesheet" href="styles.css" />
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Rubik:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css">
+  <!-- Fonte cursiva do Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="app" class="app">
-    <header class="header">
-      <div class="logo">
-        <div class="badge">C</div>
-        <div>
-          <div class="title">Cursiva PT‑BR</div>
-          <div class="subtitle">Trace, escreva e aprenda — divertido!</div>
-        </div>
-      </div>
-      <div class="topStats">
-        <div class="stat">
-          <div class="label">Questão</div>
-          <div id="qCount" class="value">0/10</div>
-        </div>
-        <div class="stat">
-          <div class="label">Pontuação</div>
-          <div id="score" class="value">0/10</div>
-        </div>
-      </div>
-    </header>
+  <div class="container">
+    <h1>Aprendendo Cursiva</h1>
+    <div id="scoreboard">Placar: 0/10</div>
+    <div id="question-counter">Pergunta 1 de 10</div>
+    <div id="word-display"></div>
 
-    <main class="main">
-      <section class="card">
-        <div class="wordDisplay" id="wordDisplay" aria-live="polite">carregando...</div>
+    <input type="text" id="answer-input" placeholder="Digite a palavra aqui..." autocomplete="off" />
+    <button id="submit-btn">Enviar</button>
 
-        <div class="canvasWrap">
-          <canvas id="drawCanvas" class="drawingArea" width="900" height="260"></canvas>
-          <div class="canvasControls">
-            <button id="clearBtn" class="btn">Limpar</button>
-            <button id="exportImgBtn" class="btn ghost">Abrir imagem</button>
-            <button id="downloadHistoryBtn" class="btn ghost">Baixar histórico (JSON)</button>
-          </div>
-        </div>
+    <div id="feedback"></div>
+    <div id="final-message" class="hidden"></div>
+    <button id="play-again" class="hidden">Jogar Novamente</button>
 
-        <form id="answerForm" class="inputRow" autocomplete="off">
-          <input id="answerInput" class="textInput" placeholder="Digite a palavra (acentos são opcionais)" />
-          <button id="submitBtn" class="btn" type="submit">Enviar</button>
-        </form>
-
-        <div id="feedback" class="feedback small">Trace a palavra e digite. Aceitamos acento ou pequenas variações.</div>
-
-        <div class="hintsArea">
-          <div style="font-weight:700">Dicas de traçado</div>
-          <div id="hints" class="hints"></div>
-          <div class="small" style="margin-top:6px">Toque/ clique nas letras para ver o traçado animado.</div>
-        </div>
-      </section>
-
-      <aside class="sidebar">
-        <div class="scoreCard">
-          <div style="display:flex; justify-content:space-between; align-items:center">
-            <div>
-              <div class="label">Progresso</div>
-              <div id="progressText" style="font-weight:700; font-size:18px">Questão 0 de 10</div>
-            </div>
-            <div>
-              <div class="label">Acertos</div>
-              <div id="scoreShort" style="font-weight:700; font-size:18px">0</div>
-            </div>
-          </div>
-          <div class="progressBar" style="margin-top:12px">
-            <div id="progressFill" style="width:0%"></div>
-          </div>
-
-          <div style="margin-top:10px; font-size:13px; color:var(--muted)">Histórico desta rodada:</div>
-          <div id="historyList" class="historyList"></div>
-        </div>
-
-        <div class="scoreCard">
-          <div style="font-weight:700; font-size:16px">Como usar</div>
-          <ul style="margin-top:8px; color:var(--muted); padding-left:18px">
-            <li>Trace a palavra com dedo ou mouse.</li>
-            <li>Use as dicas visuais por letra.</li>
-            <li>Digite a palavra — acentos são opcionais.</li>
-            <li>Ao fim, reveja seus traços com reprodução animada.</li>
-          </ul>
-        </div>
-
-        <div>
-          <button id="playAgainBtn" class="btn">Recomeçar</button>
-        </div>
-      </aside>
-    </main>
-
-    <!-- results overlay -->
-    <div id="overlay" class="overlay hidden">
-      <div class="results">
-        <h2 id="finalScore">Resultado: 0/10</h2>
-        <p id="finalMessage">Mensagem</p>
-
-        <div style="margin-top:12px; text-align:left">
-          <div style="font-weight:700; margin-bottom:8px">Revisão dos traços:</div>
-          <div id="previews" class="previewGrid"></div>
-        </div>
-
-        <div style="margin-top:18px; display:flex; justify-content:center; gap:12px">
-          <button id="playAgainEndBtn" class="btn">Jogar Novamente</button>
-        </div>
-      </div>
-    </div>
-
-    <canvas id="fireworks" class="fireworks-canvas hidden"></canvas>
+    <canvas id="fireworks" class="hidden"></canvas>
   </div>
 
-  <!-- data and scripts -->
   <script src="wordList.js"></script>
-  <script src="svgHints.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
