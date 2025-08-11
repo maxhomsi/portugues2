@@ -3,53 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escola de Caligrafia Mágica 🪄</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <link href="./fonts/DancingScript-Bold.ttf" rel="stylesheet">
-    
+    <title>Aprenda Caligrafia com App do Papai!</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>">
 </head>
 <body>
 
-    <div id="scroll-container">
-        
-        <div id="fireworks-container"></div>
+    <header class="app-header">
+      <h1>Vamos praticar Caligrafia ✍️</h1>
+    </header>
 
-        <div id="game-screen">
-            <div class="header">
-                <div id="score-display" class="score">✨ Pontos: <span id="score-value">0</span></div>
-                <div id="question-counter" class="question-counter">Lição 1 de 10</div>
-            </div>
-            
-            <div id="cursive-word" class="cursive-word-container">
-                <span id="cursive-word-text">Feitiço</span>
-            </div>
-            
-            <form id="answer-form" class="answer-form">
-                <input
-                    type="text"
-                    id="answer-input"
-                    class="answer-input"
-                    placeholder="Escreva o encanto..."
-                    autocomplete="off"
-                    autofocus
-                />
-                <span id="feedback-icon"></span>
-            </form>
-        </div>
+    <main class="game-container">
+      <div class="top-row">
+        <div class="scoreboard" id="scoreboard">Pontuação: 0/10</div>
+        <div class="question-info" id="questionInfo">Pergunta 1 de 10</div>
+      </div>
 
-        <div id="results-screen" class="hidden">
-            <h2 id="final-message"></h2>
-            <p id="final-score-display"></p>
-            <button id="restart-button" class="button">Nova Lição 📜</button>
-        </div>
+      <div class="word-area">
+        <div id="wordDisplay" class="word-display">preparando...</div>
+      </div>
 
+      <div class="input-area">
+        <input id="answerInput" type="text" placeholder="Escreva a palavra aqui..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <button id="submitBtn" aria-label="Enviar resposta">Enviar</button>
+      </div>
+
+      <div id="feedback" class="feedback" aria-live="polite"></div>
+    </main>
+
+    <div id="resultModal" class="result-modal" hidden>
+      <div class="result-content" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <h2 id="resultTitle"></h2>
+        <p id="resultText"></p>
+        <button id="restartBtn">Jogue Novamente</button>
+      </div>
     </div>
+    
+    <div class="fireworks" id="fireworksContainer"></div>
+
 
     <script src="wordList.js"></script>
+    <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

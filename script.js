@@ -1,116 +1,205 @@
-// --- Get all the HTML elements we need ---
-const gameScreen = document.getElementById('game-screen');
-const resultsScreen = document.getElementById('results-screen');
-const scoreDisplay = document.getElementById('score-display');
-const scoreValue = document.getElementById('score-value'); // The number part of the score
-const questionCounter = document.getElementById('question-counter');
-const cursiveWord = document.getElementById('cursive-word');
-const answerForm = document.getElementById('answer-form');
-const answerInput = document.getElementById('answer-input');
-const feedbackIcon = document.getElementById('feedback-icon');
-const finalMessage = document.getElementById('final-message');
-const finalScoreDisplay = document.getElementById('final-score-display');
-const restartButton = document.getElementById('restart-button');
-const fireworksContainer = document.getElementById('fireworks-container');
+// Este arquivo contém toda a lógica interativa do jogo.
 
-// --- Game State ---
-let score = 0;
-let currentQuestionIndex = 0;
-let currentWords = [];
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Referências aos Elementos do DOM ---
+    const dom = {
+        wordDisplay: document.getElementById('wordDisplay'),
+        answerInput: document.getElementById('answerInput'),
+        submitBtn: document.getElementById('submitBtn'),
+        feedback: document.getElementById('feedback'),
+        scoreboard: document.getElementById('scoreboard'),
+        questionInfo: document.getElementById('questionInfo'),
+        resultModal: document.getElementById('resultModal'),
+        resultTitle: document.getElementById('resultTitle'),
+        resultText: document.getElementById('resultText'),
+        restartBtn: document.getElementById('restartBtn'),
+        fireworksContainer: document.getElementById('fireworksContainer'),
+    };
 
-// --- Functions ---
-
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
-function displayQuestion() {
-    feedbackIcon.textContent = '';
-    feedbackIcon.className = '';
-    answerInput.value = '';
-    answerInput.disabled = false;
-    answerInput.focus();
-
-    cursiveWord.textContent = currentWords[currentQuestionIndex];
-    // Add animation class to make the word pop in
-    cursiveWord.style.animation = 'none';
-    cursiveWord.offsetHeight; /* trigger reflow */
-    cursiveWord.style.animation = null; 
-
-    scoreValue.textContent = score;
-    questionCounter.textContent = `Questão ${currentQuestionIndex + 1} de 10`;
-}
-
-function endRound() {
-    gameScreen.classList.add('hidden');
-    resultsScreen.classList.remove('hidden');
-    finalMessage.className = ''; // Reset class from previous round
-
-    if (score === 10) {
-        finalMessage.textContent = 'PARABÉNS!!!';
-        finalMessage.classList.add('rainbow'); // Add rainbow class for the text!
-        fireworksContainer.innerHTML = `
-            <div class="firework"></div><div class="firework"></div><div class="firework"></div>
-            <div class="firework"></div><div class="firework"></div><div class="firework"></div>
-        `;
-        fireworksContainer.classList.add('active');
-    } else if (score >= 5) {
-        finalMessage.textContent = 'Muito bem, quase 100%!';
-    } else {
-        finalMessage.textContent = 'Vamos tentar novamente?';
-    }
-
-    finalScoreDisplay.textContent = `Sua pontuação: ${score} de 10 acertos`;
-}
-
-function startNewRound() {
-    score = 0;
-    currentQuestionIndex = 0;
-    currentWords = shuffleArray([...wordList]).slice(0, 10);
+    // --- Configuração da Síntese de Voz ---
+    const synth = window.speechSynthesis;
+    let ptBrVoice = null;
     
-    resultsScreen.classList.add('hidden');
-    gameScreen.classList.remove('hidden');
-    fireworksContainer.classList.remove('active');
-    fireworksContainer.innerHTML = '';
+    function loadVoices() {
+        const voices = synth.getVoices();
+        ptBrVoice = voices.find(voice => voice.lang === 'pt-BR');
+        // Fallback para a primeira voz pt, caso 'pt-BR' não exista
+        if (!ptBrVoice) {
+            ptBrVoice = voices.find(voice => voice.lang.startsWith('pt'));
+        }
+    }
+    // As vozes são carregadas de forma assíncrona
+    synth.onvoiceschanged = loadVoices;
+    loadVoices();
 
-    displayQuestion();
-}
-
-answerForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const userAnswer = answerInput.value.trim().toLowerCase();
-    if (userAnswer === '') return;
-
-    const correctAnswer = currentWords[currentQuestionIndex].toLowerCase();
-    answerInput.disabled = true;
-
-    if (userAnswer === correctAnswer) {
-        score++;
-        feedbackIcon.textContent = '✅';
-        feedbackIcon.className = 'correct';
-        // Trigger the score pulse animation!
-        scoreDisplay.classList.add('score-update');
-        setTimeout(() => scoreDisplay.classList.remove('score-update'), 500);
-    } else {
-        feedbackIcon.textContent = '❌';
-        feedbackIcon.className = 'incorrect';
+    /**
+     * Fala o texto fornecido usando a voz pt-BR.
+     * @param {string} text - O texto a ser falado.
+     */
+    function speak(text) {
+        if (synth.speaking) {
+            synth.cancel();
+        }
+        if (text !== '' && ptBrVoice) {
+            const utterThis = new SpeechSynthesisUtterance(text);
+            utterThis.voice = ptBrVoice;
+            utterThis.pitch = 1.1;
+            utterThis.rate = 0.9;
+            synth.speak(utterThis);
+        }
     }
 
-    setTimeout(() => {
-        if (currentQuestionIndex < 9) {
-            currentQuestionIndex++;
-            displayQuestion();
+    /**
+     * Renderiza a questão atual na tela.
+     */
+    function renderQuestion() {
+        const currentWord = GameData.getCurrentWord();
+        
+        // Animação de troca de palavra
+        dom.wordDisplay.classList.add('changing');
+
+        setTimeout(() => {
+            dom.wordDisplay.textContent = currentWord;
+            dom.wordDisplay.classList.remove('changing');
+        }, 150); // Metade da transição
+
+        dom.scoreboard.textContent = `Pontuação: ${GameData.score}/${GameData.roundWordsCount}`;
+        dom.questionInfo.textContent = `Pergunta ${GameData.currentIndex + 1} de ${GameData.roundWordsCount}`;
+
+        // Limpa o estado da UI
+        dom.answerInput.value = '';
+        dom.answerInput.disabled = false;
+        dom.submitBtn.disabled = false;
+        dom.feedback.textContent = '';
+        dom.feedback.className = 'feedback';
+
+        dom.answerInput.focus();
+    }
+    
+    /**
+     * Normaliza a entrada do usuário para comparação.
+     * @param {string} input - A string de entrada.
+     * @returns {string} A string normalizada.
+     */
+    function normalizeInput(input) {
+        return input.trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+    
+    /**
+     * Manipula o envio da resposta pelo usuário.
+     */
+    function handleSubmit() {
+        const userAnswer = normalizeInput(dom.answerInput.value);
+        const correctAnswer = GameData.getCurrentWord();
+
+        if (userAnswer === '') return;
+
+        dom.answerInput.disabled = true;
+        dom.submitBtn.disabled = true;
+
+        dom.feedback.classList.add('visible');
+        if (userAnswer === correctAnswer) {
+            GameData.score++;
+            dom.feedback.textContent = '✅ Certo!';
+            dom.feedback.classList.add('correct');
+            speak(correctAnswer);
         } else {
-            endRound();
+            dom.feedback.textContent = `❌ Errado. A palavra era: ${correctAnswer}`;
+            dom.feedback.classList.add('incorrect');
         }
-    }, 1200);
+        
+        dom.scoreboard.textContent = `Pontuação: ${GameData.score}/${GameData.roundWordsCount}`;
+
+        setTimeout(advanceOrFinish, 1500);
+    }
+
+    /**
+     * Avança para a próxima pergunta ou finaliza o jogo.
+     */
+    function advanceOrFinish() {
+        GameData.currentIndex++;
+        if (GameData.currentIndex < GameData.roundWordsCount) {
+            renderQuestion();
+        } else {
+            showResultModal();
+        }
+    }
+
+    /**
+     * Exibe o modal de resultados com a pontuação final.
+     */
+    function showResultModal() {
+        const score = GameData.score;
+        let title = '';
+        let text = `Sua pontuação final foi: ${score} de ${GameData.roundWordsCount}`;
+
+        if (score === GameData.roundWordsCount) {
+            title = '🎉 PARABÉNS!!!!!! 🎉';
+            triggerFireworks();
+        } else if (score >= 5) {
+            title = 'Muito bem!';
+            text = 'Você está quase lá! Continue praticando. ' + text;
+        } else {
+            title = 'Continue tentando!';
+            text = 'A prática leva à perfeição. Vamos de novo? ' + text;
+        }
+
+        dom.resultTitle.textContent = title;
+        dom.resultText.textContent = text;
+        dom.resultModal.hidden = false;
+        dom.restartBtn.focus();
+    }
+
+    /**
+     * Inicia uma nova rodada do jogo.
+     */
+    function restartRound() {
+        GameData.resetRound();
+        dom.resultModal.hidden = true;
+        renderQuestion();
+    }
+
+    /**
+     * Dispara a animação de fogos de artifício em CSS.
+     */
+    function triggerFireworks() {
+        const fireworksCount = 30; // Número de "explosões"
+        const container = dom.fireworksContainer;
+        container.innerHTML = '';
+
+        for (let i = 0; i < fireworksCount; i++) {
+            setTimeout(() => {
+                const explosion = document.createElement('div');
+                explosion.style.left = `${Math.random() * 100}%`;
+                explosion.style.top = `${Math.random() * 100}%`;
+
+                for (let j = 0; j < 25; j++) { // Partículas por explosão
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    particle.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
+                    particle.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
+                    particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    explosion.appendChild(particle);
+                }
+                container.appendChild(explosion);
+                
+                // Remove a explosão do DOM após a animação
+                setTimeout(() => explosion.remove(), 1000);
+
+            }, Math.random() * 1500);
+        }
+    }
+
+    // --- Vinculação de Eventos ---
+    dom.submitBtn.addEventListener('click', handleSubmit);
+    dom.answerInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSubmit();
+        }
+    });
+    dom.restartBtn.addEventListener('click', restartRound);
+
+    // --- Inicialização do Jogo ---
+    GameData.resetRound();
+    renderQuestion();
 });
-
-restartButton.addEventListener('click', startNewRound);
-
-// --- Initial Game Start ---
-startNewRound();

@@ -1,0 +1,266 @@
+/* --- Geral e Reset --- */
+:root {
+    --bg-color: #f0f4f8;
+    --container-bg: #ffffff;
+    --primary-text: #2c3e50;
+    --secondary-text: #7f8c8d;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --correct-color: #2ecc71;
+    --incorrect-color: #e74c3c;
+    --font-cursive: 'DancingScriptBoldLocal', cursive;
+    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Importação da Fonte Local --- */
+@font-face {
+    font-family: 'DancingScriptBoldLocal';
+    src: url('./fonts/DancingScript-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+    font-family: var(--font-ui);
+    background-color: var(--bg-color);
+    color: var(--primary-text);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    overflow: hidden; /* Oculta scrollbars durante animações */
+}
+
+/* --- Layout Principal --- */
+.app-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.app-header h1 {
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    color: var(--primary-text);
+}
+
+.game-container {
+    background: var(--container-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 2rem 2.5rem;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+.scoreboard, .question-info {
+    background: #ecf0f1;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+/* --- Display da Palavra em Cursiva --- */
+.word-area {
+    padding: 1rem 0;
+}
+
+.word-display {
+    font-family: var(--font-cursive);
+    font-size: clamp(3.5rem, 12vw, 6rem); /* Responsivo */
+    color: var(--primary-text);
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease;
+}
+
+.word-display.changing {
+    transform: scale(0.9);
+    opacity: 0;
+}
+
+/* --- Área de Input --- */
+.input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#answerInput {
+    flex-grow: 1;
+    padding: 0.8rem 1rem;
+    border: 2px solid #bdc3c7;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#answerInput:focus {
+    border-color: var(--accent-color);
+}
+
+#submitBtn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#submitBtn:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+}
+
+#submitBtn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* --- Feedback Visual --- */
+.feedback {
+    min-height: 40px;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feedback.visible {
+    opacity: 1;
+}
+
+.feedback.correct {
+    background-color: #eafaf1;
+    color: var(--correct-color);
+}
+
+.feedback.incorrect {
+    background-color: #fbeae9;
+    color: var(--incorrect-color);
+}
+
+/* --- Modal de Resultados --- */
+.result-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.result-modal:not([hidden]) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.result-content {
+    background: var(--container-bg);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: var(--shadow);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.result-modal:not([hidden]) .result-content {
+    transform: scale(1);
+}
+
+#resultTitle {
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+}
+
+#resultText {
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    color: var(--secondary-text);
+}
+
+#restartBtn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#restartBtn:hover {
+    background-color: var(--accent-hover);
+}
+
+
+/* --- Animação de Fogos de Artifício (CSS) --- */
+.fireworks {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99;
+}
+
+.fireworks .particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    opacity: 0;
+    background: hsl(60, 100%, 50%); /* Cor inicial */
+    border-radius: 50%;
+    animation: explode 1s ease-out forwards;
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x), var(--y)) scale(0);
+        opacity: 0;
+    }
+}
