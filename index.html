@@ -3,37 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursive Practice</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Cursiva Divertida do Papai</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <h1>Praticando leitura Cursiva!</h1>
-            <div class="score-board">
-                <span id="score-display">Pontuacão: 0/10</span>
-            </div>
-        </header>
-        <main id="main-content">
-            <div class="game-container">
-                <div class="question-info">
-                    <span id="question-count">Questão 1 de 10</span>
-                </div>
-                <div class="word-display-container">
-                    <p id="cursive-word"></p>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="user-input" placeholder="Escreva a palavra aqui...">
-                    <button id="submit-btn">Enviar</button>
-                </div>
-                <div id="feedback-message"></div>
-            </div>
-        </main>
-    </div>
-    <script src="words.js"></script>
-    <script src="script.js"></script>
+    <div id="root"></div>
+
+    <script type="text/babel" src="App.js"></script>
 </body>
 </html>
