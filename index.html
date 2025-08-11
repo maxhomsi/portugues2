@@ -3,30 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursiva Super Divertida! 🎨</title>
+    <title>Escola de Caligrafia Mágica 🪄</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <link href="./fonts/DancingScript-Bold.ttf" rel="stylesheet">
     
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div id="app-container" class="app-container">
-
+    <div id="scroll-container">
+        
         <div id="fireworks-container"></div>
 
         <div id="game-screen">
             <div class="header">
-                <div id="score-display" class="score">⭐ Pontos: <span id="score-value">0</span></div>
-                <div id="question-counter" class="question-counter">Questão 1 de 10</div>
+                <div id="score-display" class="score">✨ Pontos: <span id="score-value">0</span></div>
+                <div id="question-counter" class="question-counter">Lição 1 de 10</div>
             </div>
             
-            <div id="cursive-word" class="cursive-word">Vamos!</div>
+            <div id="cursive-word" class="cursive-word-container">
+                <span id="cursive-word-text">Feitiço</span>
+            </div>
             
             <form id="answer-form" class="answer-form">
                 <input
                     type="text"
                     id="answer-input"
                     class="answer-input"
-                    placeholder="Qual é a palavra? 🤔"
+                    placeholder="Escreva o encanto..."
                     autocomplete="off"
                     autofocus
                 />
@@ -37,7 +44,7 @@
         <div id="results-screen" class="hidden">
             <h2 id="final-message"></h2>
             <p id="final-score-display"></p>
-            <button id="restart-button" class="button">Jogar de Novo! 🚀</button>
+            <button id="restart-button" class="button">Nova Lição 📜</button>
         </div>
 
     </div>
