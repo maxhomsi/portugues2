@@ -1,139 +1,159 @@
-let currentWord = "";
+// Game state variables
+let currentWords = [];
+let currentIndex = 0;
 let score = 0;
-let questionNumber = 0;
-let roundWords = [];
+let feedbackTimeout;
+let roundOver = false;
 
-const scoreboard = document.getElementById("scoreboard");
-const questionCounter = document.getElementById("question-counter");
-const wordDisplay = document.getElementById("word-display");
-const answerInput = document.getElementById("answer-input");
-const submitBtn = document.getElementById("submit-btn");
-const feedback = document.getElementById("feedback");
-const finalMessage = document.getElementById("final-message");
-const playAgainBtn = document.getElementById("play-again");
-const fireworksCanvas = document.getElementById("fireworks");
-const ctx = fireworksCanvas.getContext("2d");
+// DOM elements
+const cursiveWordEl = document.getElementById('cursive-word');
+const userInputEl = document.getElementById('user-input');
+const submitBtn = document.getElementById('submit-btn');
+const scoreDisplayEl = document.getElementById('score-display');
+const questionCountEl = document.getElementById('question-count');
+const feedbackEl = document.getElementById('feedback-message');
+const mainContentEl = document.getElementById('main-content');
+const appContainerEl = document.querySelector('.app-container');
 
-fireworksCanvas.width = window.innerWidth;
-fireworksCanvas.height = window.innerHeight;
+// Start a new game round
+function newGame() {
+    score = 0;
+    currentIndex = 0;
+    roundOver = false;
+    currentWords = [];
+    
+    // Shuffle the words and pick the first 10
+    const shuffledWords = [...words].sort(() => 0.5 - Math.random());
+    currentWords = shuffledWords.slice(0, 10);
+    
+    // Clear the main content and show the game
+    mainContentEl.innerHTML = `
+        <div class="game-container">
+            <div class="question-info">
+                <span id="question-count">Questão 1 de 10</span>
+            </div>
+            <div class="word-display-container">
+                <p id="cursive-word"></p>
+            </div>
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Escreva a palavra aqui...">
+                <button id="submit-btn">Enviar</button>
+            </div>
+            <div id="feedback-message"></div>
+        </div>
+    `;
 
-function startGame() {
-  score = 0;
-  questionNumber = 0;
-  finalMessage.classList.add("hidden");
-  playAgainBtn.classList.add("hidden");
-  fireworksCanvas.classList.add("hidden");
-  feedback.textContent = "";
-  answerInput.value = "";
+    // Re-assign DOM elements after new HTML is loaded
+    cursiveWordEl = document.getElementById('cursive-word');
+    userInputEl = document.getElementById('user-input');
+    submitBtn = document.getElementById('submit-btn');
+    questionCountEl = document.getElementById('question-count');
+    feedbackEl = document.getElementById('feedback-message');
 
-  roundWords = shuffleArray([...wordList]).slice(0, 10);
-  nextQuestion();
-}
-
-function shuffleArray(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-function removeAccents(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-function nextQuestion() {
-  if (questionNumber >= 10) {
-    endGame();
-    return;
-  }
-
-  currentWord = roundWords[questionNumber];
-  questionCounter.textContent = `Pergunta ${questionNumber + 1} de 10`;
-  scoreboard.textContent = `Placar: ${score}/10`;
-  wordDisplay.textContent = currentWord;
-  answerInput.value = "";
-  answerInput.focus();
-}
-
-function checkAnswer() {
-  const userAnswer = removeAccents(answerInput.value.trim().toLowerCase());
-  const correctAnswer = removeAccents(currentWord.toLowerCase());
-
-  if (userAnswer === correctAnswer) {
-    score++;
-    feedback.textContent = "✅ Correto!";
-    feedback.style.color = "green";
-  } else {
-    feedback.textContent = `❌ Errado! Correto: ${currentWord}`;
-    feedback.style.color = "red";
-  }
-
-  questionNumber++;
-  setTimeout(nextQuestion, 1500);
-}
-
-function endGame() {
-  scoreboard.textContent = `Placar: ${score}/10`;
-  feedback.textContent = "";
-
-  if (score < 5) {
-    finalMessage.textContent = "Vamos tentar novamente?";
-  } else if (score < 10) {
-    finalMessage.textContent = "Muito bem, quase 100%!";
-  } else {
-    finalMessage.textContent = "PARABÉNS!!!!!!";
-    startFireworks();
-  }
-
-  finalMessage.classList.remove("hidden");
-  playAgainBtn.classList.remove("hidden");
-}
-
-function startFireworks() {
-  fireworksCanvas.classList.remove("hidden");
-  let particles = [];
-
-  function createParticle(x, y, color) {
-    return {
-      x,
-      y,
-      color,
-      radius: Math.random() * 4 + 1,
-      speedX: Math.random() * 5 - 2.5,
-      speedY: Math.random() * 5 - 2.5,
-      life: 100
-    };
-  }
-
-  function loop() {
-    ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-    if (Math.random() < 0.05) {
-      const x = Math.random() * fireworksCanvas.width;
-      const y = Math.random() * fireworksCanvas.height / 2;
-      const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-      for (let i = 0; i < 50; i++) {
-        particles.push(createParticle(x, y, color));
-      }
-    }
-
-    particles.forEach((p, i) => {
-      p.x += p.speedX;
-      p.y += p.speedY;
-      p.life--;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-      if (p.life <= 0) particles.splice(i, 1);
+    // Add event listener to the new submit button
+    submitBtn.addEventListener('click', checkAnswer);
+    userInputEl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
     });
 
-    requestAnimationFrame(loop);
-  }
-
-  loop();
+    updateUI();
 }
 
-submitBtn.addEventListener("click", checkAnswer);
-answerInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") checkAnswer();
-});
-playAgainBtn.addEventListener("click", startGame);
+// Update the UI with the next word and score
+function updateUI() {
+    if (currentIndex < 10) {
+        cursiveWordEl.textContent = currentWords[currentIndex];
+        userInputEl.value = '';
+        userInputEl.focus();
+        scoreDisplayEl.textContent = `Score: ${score}/10`;
+        questionCountEl.textContent = `Questão ${currentIndex + 1} de 10`;
+    } else {
+        endGame();
+    }
+}
 
-startGame();
+// Check the user's answer
+function checkAnswer() {
+    if (roundOver) return;
+
+    const userAnswer = userInputEl.value.trim().toLowerCase();
+    const correctAnswer = currentWords[currentIndex].toLowerCase();
+
+    if (userAnswer === correctAnswer) {
+        score++;
+        showFeedback("🎉 Correto!", "positive");
+    } else {
+        showFeedback(`❌ Incorreto. Era "${correctAnswer}".`, "negative");
+    }
+
+    currentIndex++;
+    setTimeout(updateUI, 1500); // Wait 1.5 seconds before moving to the next word
+}
+
+// Display feedback message to the user
+function showFeedback(message, className) {
+    clearTimeout(feedbackTimeout);
+    feedbackEl.textContent = message;
+    feedbackEl.className = className;
+    feedbackTimeout = setTimeout(() => {
+        feedbackEl.textContent = '';
+        feedbackEl.className = '';
+    }, 1500);
+}
+
+// Handle the end of the game
+function endGame() {
+    roundOver = true;
+    let endMessage = "";
+    let isFirework = false;
+
+    if (score === 10) {
+        endMessage = "PARABENS!!!!!! 🥳";
+        isFirework = true;
+    } else if (score >= 5) {
+        endMessage = "Muito bem, quase 100%! 👍";
+    } else {
+        endMessage = "Vamos tentar novamente? 😢";
+    }
+
+    // Display end screen
+    mainContentEl.innerHTML = `
+        <div class="end-screen">
+            <h2>Fim da Rodada!</h2>
+            <p>Seu score foi de ${score} de 10.</p>
+            <p>${endMessage}</p>
+            <button id="play-again-btn">Jogar Novamente</button>
+        </div>
+    `;
+
+    // Add event listener to the new "Play Again" button
+    document.getElementById('play-again-btn').addEventListener('click', newGame);
+
+    if (isFirework) {
+        createFireworks();
+    }
+}
+
+// Create a fireworks animation
+function createFireworks() {
+    const fireworksContainer = document.createElement('div');
+    fireworksContainer.className = 'fireworks-container';
+    appContainerEl.appendChild(fireworksContainer);
+
+    for (let i = 0; i < 50; i++) {
+        const firework = document.createElement('div');
+        firework.className = 'firework';
+        firework.style.left = `${Math.random() * 100}%`;
+        firework.style.top = `${Math.random() * 100}%`;
+        fireworksContainer.appendChild(firework);
+    }
+    
+    setTimeout(() => {
+        fireworksContainer.remove();
+    }, 3000); // Remove fireworks after 3 seconds
+}
+
+// Initial call to start the game
+newGame();
