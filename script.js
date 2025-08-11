@@ -1,159 +1,128 @@
-// Game state variables
-let currentWords = [];
-let currentIndex = 0;
+// --- Get all the HTML elements we need to work with ---
+const gameScreen = document.getElementById('game-screen');
+const resultsScreen = document.getElementById('results-screen');
+const scoreDisplay = document.getElementById('score-display');
+const questionCounter = document.getElementById('question-counter');
+const cursiveWord = document.getElementById('cursive-word');
+const answerForm = document.getElementById('answer-form');
+const answerInput = document.getElementById('answer-input');
+const feedbackIcon = document.getElementById('feedback-icon');
+const finalMessage = document.getElementById('final-message');
+const finalScoreDisplay = document.getElementById('final-score-display');
+const restartButton = document.getElementById('restart-button');
+const fireworksContainer = document.getElementById('fireworks-container');
+
+// --- Game State Variables ---
 let score = 0;
-let feedbackTimeout;
-let roundOver = false;
+let currentQuestionIndex = 0;
+let currentWords = [];
 
-// DOM elements
-const cursiveWordEl = document.getElementById('cursive-word');
-const userInputEl = document.getElementById('user-input');
-const submitBtn = document.getElementById('submit-btn');
-const scoreDisplayEl = document.getElementById('score-display');
-const questionCountEl = document.getElementById('question-count');
-const feedbackEl = document.getElementById('feedback-message');
-const mainContentEl = document.getElementById('main-content');
-const appContainerEl = document.querySelector('.app-container');
+// --- Functions ---
 
-// Start a new game round
-function newGame() {
-    score = 0;
-    currentIndex = 0;
-    roundOver = false;
-    currentWords = [];
-    
-    // Shuffle the words and pick the first 10
-    const shuffledWords = [...words].sort(() => 0.5 - Math.random());
-    currentWords = shuffledWords.slice(0, 10);
-    
-    // Clear the main content and show the game
-    mainContentEl.innerHTML = `
-        <div class="game-container">
-            <div class="question-info">
-                <span id="question-count">Questão 1 de 10</span>
-            </div>
-            <div class="word-display-container">
-                <p id="cursive-word"></p>
-            </div>
-            <div class="input-container">
-                <input type="text" id="user-input" placeholder="Escreva a palavra aqui...">
-                <button id="submit-btn">Enviar</button>
-            </div>
-            <div id="feedback-message"></div>
-        </div>
-    `;
-
-    // Re-assign DOM elements after new HTML is loaded
-    cursiveWordEl = document.getElementById('cursive-word');
-    userInputEl = document.getElementById('user-input');
-    submitBtn = document.getElementById('submit-btn');
-    questionCountEl = document.getElementById('question-count');
-    feedbackEl = document.getElementById('feedback-message');
-
-    // Add event listener to the new submit button
-    submitBtn.addEventListener('click', checkAnswer);
-    userInputEl.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            checkAnswer();
-        }
-    });
-
-    updateUI();
-}
-
-// Update the UI with the next word and score
-function updateUI() {
-    if (currentIndex < 10) {
-        cursiveWordEl.textContent = currentWords[currentIndex];
-        userInputEl.value = '';
-        userInputEl.focus();
-        scoreDisplayEl.textContent = `Score: ${score}/10`;
-        questionCountEl.textContent = `Questão ${currentIndex + 1} de 10`;
-    } else {
-        endGame();
+// Function to shuffle an array (the Fisher-Yates shuffle algorithm)
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]; // Swap elements
     }
+    return array;
 }
 
-// Check the user's answer
-function checkAnswer() {
-    if (roundOver) return;
+// Function to display the current question
+function displayQuestion() {
+    // Clear previous feedback and input
+    feedbackIcon.textContent = '';
+    feedbackIcon.className = '';
+    answerInput.value = '';
+    answerInput.disabled = false;
+    answerInput.focus();
 
-    const userAnswer = userInputEl.value.trim().toLowerCase();
-    const correctAnswer = currentWords[currentIndex].toLowerCase();
+    // Update the displays
+    cursiveWord.textContent = currentWords[currentQuestionIndex];
+    scoreDisplay.textContent = `Pontos: ${score}`;
+    questionCounter.textContent = `Questão ${currentQuestionIndex + 1} de 10`;
+}
 
+// Function to handle the end of the round
+function endRound() {
+    // Hide game, show results
+    gameScreen.classList.add('hidden');
+    resultsScreen.classList.remove('hidden');
+
+    // Display final message based on score
+    if (score === 10) {
+        finalMessage.textContent = 'PARABENS!!!!!!';
+        // Trigger the fireworks! 🎆
+        fireworksContainer.innerHTML = `
+            <div class="firework"></div> <div class="firework"></div>
+            <div class="firework"></div> <div class="firework"></div>
+            <div class="firework"></div> <div class="firework"></div>
+        `;
+        fireworksContainer.classList.add('active');
+    } else if (score >= 5) {
+        finalMessage.textContent = 'Muito bem, quase 100%!';
+    } else {
+        finalMessage.textContent = 'Vamos tentar novamente?';
+    }
+
+    finalScoreDisplay.textContent = `Sua pontuação final: ${score} de 10`;
+}
+
+// Function to start a new round from scratch
+function startNewRound() {
+    // Reset state
+    score = 0;
+    currentQuestionIndex = 0;
+    
+    // Get 10 new unique words
+    currentWords = shuffleArray([...wordList]).slice(0, 10);
+    
+    // Reset UI
+    resultsScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+    fireworksContainer.classList.remove('active');
+    fireworksContainer.innerHTML = ''; // Clear old fireworks
+
+    displayQuestion();
+}
+
+// --- Event Listeners ---
+
+// Listen for when the user submits an answer
+answerForm.addEventListener('submit', (event) => {
+    event.preventDefault(); // Stop the page from reloading
+    
+    const userAnswer = answerInput.value.trim().toLowerCase();
+    if (userAnswer === '') return; // Don't do anything if the input is empty
+
+    const correctAnswer = currentWords[currentQuestionIndex].toLowerCase();
+    
+    answerInput.disabled = true; // Disable input while showing feedback
+
+    // Check if the answer is correct
     if (userAnswer === correctAnswer) {
         score++;
-        showFeedback("🎉 Correto!", "positive");
+        feedbackIcon.textContent = '✓';
+        feedbackIcon.className = 'correct';
     } else {
-        showFeedback(`❌ Incorreto. Era "${correctAnswer}".`, "negative");
+        feedbackIcon.textContent = '✗';
+        feedbackIcon.className = 'incorrect';
     }
 
-    currentIndex++;
-    setTimeout(updateUI, 1500); // Wait 1.5 seconds before moving to the next word
-}
-
-// Display feedback message to the user
-function showFeedback(message, className) {
-    clearTimeout(feedbackTimeout);
-    feedbackEl.textContent = message;
-    feedbackEl.className = className;
-    feedbackTimeout = setTimeout(() => {
-        feedbackEl.textContent = '';
-        feedbackEl.className = '';
-    }, 1500);
-}
-
-// Handle the end of the game
-function endGame() {
-    roundOver = true;
-    let endMessage = "";
-    let isFirework = false;
-
-    if (score === 10) {
-        endMessage = "PARABENS!!!!!! 🥳";
-        isFirework = true;
-    } else if (score >= 5) {
-        endMessage = "Muito bem, quase 100%! 👍";
-    } else {
-        endMessage = "Vamos tentar novamente? 😢";
-    }
-
-    // Display end screen
-    mainContentEl.innerHTML = `
-        <div class="end-screen">
-            <h2>Fim da Rodada!</h2>
-            <p>Seu score foi de ${score} de 10.</p>
-            <p>${endMessage}</p>
-            <button id="play-again-btn">Jogar Novamente</button>
-        </div>
-    `;
-
-    // Add event listener to the new "Play Again" button
-    document.getElementById('play-again-btn').addEventListener('click', newGame);
-
-    if (isFirework) {
-        createFireworks();
-    }
-}
-
-// Create a fireworks animation
-function createFireworks() {
-    const fireworksContainer = document.createElement('div');
-    fireworksContainer.className = 'fireworks-container';
-    appContainerEl.appendChild(fireworksContainer);
-
-    for (let i = 0; i < 50; i++) {
-        const firework = document.createElement('div');
-        firework.className = 'firework';
-        firework.style.left = `${Math.random() * 100}%`;
-        firework.style.top = `${Math.random() * 100}%`;
-        fireworksContainer.appendChild(firework);
-    }
-    
+    // Wait a moment, then move to the next question or end the game
     setTimeout(() => {
-        fireworksContainer.remove();
-    }, 3000); // Remove fireworks after 3 seconds
-}
+        if (currentQuestionIndex < 9) {
+            currentQuestionIndex++;
+            displayQuestion();
+        } else {
+            endRound();
+        }
+    }, 1000); // 1-second delay
+});
 
-// Initial call to start the game
-newGame();
+// Listen for when the "Jogue Novamente" button is clicked
+restartButton.addEventListener('click', startNewRound);
+
+// --- Initial Game Start ---
+// Start the first round as soon as the page loads!
+startNewRound();

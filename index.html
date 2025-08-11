@@ -3,21 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursiva Divertida do Papai</title>
+    <title>Cursiva Divertida PT-BR</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="styles.css">
-    
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel" src="App.js"></script>
+    <div id="app-container" class="app-container">
+
+        <div id="fireworks-container"></div>
+
+        <div id="game-screen">
+            <div class="header">
+                <div id="score-display" class="score">Pontos: 0</div>
+                <div id="question-counter" class="question-counter">Questão 1 de 10</div>
+            </div>
+            
+            <div id="cursive-word" class="cursive-word">Carregando...</div>
+            
+            <form id="answer-form" class="answer-form">
+                <input
+                    type="text"
+                    id="answer-input"
+                    class="answer-input"
+                    placeholder="Digite a palavra aqui..."
+                    autocomplete="off"
+                    autofocus
+                />
+                <span id="feedback-icon"></span>
+            </form>
+        </div>
+
+        <div id="results-screen" class="hidden">
+            <h2 id="final-message"></h2>
+            <p id="final-score-display"></p>
+            <button id="restart-button" class="button">Jogue Novamente</button>
+        </div>
+
+    </div>
+
+    <script src="wordList.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-export const wordList = [
+const wordList = [
     "abacaxi", "abraço", "abril", "acampamento", "açúcar", "adeus", "adivinhar", "agora", "água", "agulha", 
     "alegria", "alface", "algodão", "almoço", "amarelo", "amigo", "amizade", "amor", "anel", "animal", 
     "aniversário", "anoitecer", "aprender", "aranha", "árvore", "asa", "assistir", "astro", "astronauta", 
@@ -76,5 +76,5 @@ export const wordList = [
     "verdade", "verão", "vermelho", "vespa", "vestido", "veterinário", "vez", "viagem", "vida", "vidro", 
     "vila", "vilão", "vinagre", "vinho", "violeta", "violão", "visita", "vitamina", "vitória", "viúva", 
     "viver", "vizinho", "voar", "você", "vogal", "volante", "volta", "vontade", "vovó", "vovô", "vulcão", 
-    "xadrez", "xampu", "xarope", "xícara", "zero", "zoológico", "zumbi"
+    "xadrez", "xampu", "xarope", "xícara", "zero", "zoológico", "zumbi", "labubu"
 ];
