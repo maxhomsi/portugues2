@@ -7,18 +7,18 @@
     --correct-color: #28a745;
     --incorrect-color: #dc3545;
     --font-ui: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    /* FIX: Added system cursive fonts as a fallback for maximum compatibility */
-    --font-cursive: 'DancingScriptEmbedded', "Brush Script MT", "Snell Roundhand", cursive;
+    --font-cursive: 'DancingScriptLocal', "Brush Script MT", "Snell Roundhand", cursive;
     --radius-l: 20px;
     --radius-m: 12px;
     --light-shadow: -10px -10px 20px #ffffff;
     --dark-shadow: 10px 10px 20px #a3b1c6;
 }
 
-/* --- EMBEDDED FONT (SOLUÇÃO DEFINITIVA) --- */
+/* --- FONT LOADING FROM LOCAL FILE --- */
 @font-face {
-    font-family: 'DancingScriptEmbedded';
-    src: url('data:.fonts/DancingScript-Bold.tff') format('truetype');
+    font-family: 'DancingScriptLocal';
+    src: url('./fonts/DancingScript-Bold.ttf') format('truetype');
+    font-weight: bold;
     font-style: normal;
     font-display: swap;
 }
@@ -103,40 +103,22 @@ body.celebration-mode {
     box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
 }
 
-/* FIX: Added overflow control for long words/sentences */
 .word-area {
     padding: 1rem 0;
-    overflow-x: auto;
-    /* Custom scrollbar for aesthetics */
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-color) var(--bg-color);
-}
-
-/* For Webkit browsers like Chrome, Safari */
-.word-area::-webkit-scrollbar {
-  height: 8px;
-}
-.word-area::-webkit-scrollbar-track {
-  background: var(--bg-color);
-  border-radius: 4px;
-}
-.word-area::-webkit-scrollbar-thumb {
-  background-color: var(--accent-color);
-  border-radius: 4px;
+    min-height: 110px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Hide any minor overflow during resizing */
 }
 
 .word-display {
     font-family: var(--font-cursive);
-    font-size: clamp(4rem, 13vw, 6.5rem);
+    font-size: clamp(2rem, 13vw, 6.5rem); 
     color: var(--primary-color);
-    min-height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease;
-    /* FIX: Prevents text from breaking into a new line */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease, font-size 0.3s ease;
     white-space: nowrap;
-    padding: 0 1rem; /* Adds some space if scrolling is needed */
+    padding: 0 5px;
 }
 
 .word-display.changing {
@@ -288,7 +270,8 @@ body.celebration-mode {
     background-color: var(--accent-hover);
 }
 
-.fireworks, .confetti {
+/* --- Animações de Celebração --- */
+.fireworks, .confetti, .celebration-characters {
     position: fixed;
     top: 0;
     left: 0;
@@ -325,4 +308,27 @@ body.celebration-mode {
 @keyframes fall {
     0% { transform: translateY(-5vh) rotateZ(0deg); opacity: 1; }
     100% { transform: translateY(105vh) rotateZ(720deg); opacity: 0; }
+}
+
+.celebration-characters {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 1rem;
+}
+
+.celebration-characters img {
+    max-width: 150px;
+    max-height: 150px;
+    animation: pop-in 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    transform: scale(0);
+}
+
+#char2 {
+    animation-delay: 0.2s;
+}
+
+@keyframes pop-in {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
 }
