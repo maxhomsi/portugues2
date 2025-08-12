@@ -36,7 +36,7 @@ const wordList = [
     { pt: "Flor", en: "Flower" },
     { pt: "Arvore", en: "Tree" },
     { pt: "Fruta", en: "Fruit" },
-    { pt: "Macan", en: "Apple" },
+    { pt: "Maçã", en: "Apple" },
     { pt: "Banana", en: "Banana" },
     { pt: "Laranja", en: "Orange" },
     { pt: "Morango", en: "Strawberry" },

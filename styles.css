@@ -1,17 +1,26 @@
-/* --- Geral e Reset --- */
+/* --- GERAL E VARIÁVEIS DE DESIGN --- */
 :root {
-    --bg-color: #f0f4f8;
-    --container-bg: #ffffff;
-    --primary-text: #2c3e50;
-    --secondary-text: #7f8c8d;
-    --accent-color: #3498db;
-    --accent-hover: #2980b9;
-    --correct-color: #2ecc71;
-    --incorrect-color: #e74c3c;
-    --font-cursive: 'DancingScriptBoldLocal', cursive;
-    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    --border-radius: 12px;
+    --bg-color: #e0e5ec;
+    --primary-color: #4a5a70;
+    --accent-color: #008cff;
+    --accent-hover: #007ae6;
+    --correct-color: #28a745;
+    --incorrect-color: #dc3545;
+    --font-ui: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* FIX: Added system cursive fonts as a fallback for maximum compatibility */
+    --font-cursive: 'DancingScriptEmbedded', "Brush Script MT", "Snell Roundhand", cursive;
+    --radius-l: 20px;
+    --radius-m: 12px;
+    --light-shadow: -10px -10px 20px #ffffff;
+    --dark-shadow: 10px 10px 20px #a3b1c6;
+}
+
+/* --- EMBEDDED FONT (SOLUÇÃO DEFINITIVA) --- */
+@font-face {
+    font-family: 'DancingScriptEmbedded';
+    src: url('data:.fonts/DancingScript-Bold.tff') format('truetype');
+    font-style: normal;
+    font-display: swap;
 }
 
 * {
@@ -20,27 +29,35 @@
     padding: 0;
 }
 
-/* --- Importação da Fonte Local --- */
-@font-face {
-    font-family: 'DancingScriptBoldLocal';
-    src: url('./fonts/DancingScript-Bold.ttf') format('truetype');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-}
-
 body {
     font-family: var(--font-ui);
     background-color: var(--bg-color);
-    color: var(--primary-text);
+    color: var(--primary-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    overflow: hidden; /* Oculta scrollbars durante animações */
+    overflow: hidden;
+    transition: background-color 0.5s ease;
 }
+
+/* --- Golden Celebration Mode --- */
+body.celebration-mode {
+    background: radial-gradient(ellipse at bottom, #fffde7, #e3e8ee);
+}
+
+.game-container.celebration-mode {
+    border: 3px solid #ffd700;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.6), var(--light-shadow), var(--dark-shadow);
+}
+
+#resultTitle.celebration-mode {
+    color: #c5a100;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+}
+
 
 /* --- Layout Principal --- */
 .app-header {
@@ -49,50 +66,77 @@ body {
 }
 
 .app-header h1 {
-    font-size: clamp(2rem, 5vw, 2.5rem);
-    color: var(--primary-text);
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 700;
+    color: var(--primary-color);
+    opacity: 0.8;
 }
 
 .game-container {
-    background: var(--container-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: 2rem 2.5rem;
+    background: var(--bg-color);
+    border-radius: var(--radius-l);
+    box-shadow: var(--dark-shadow), var(--light-shadow);
+    padding: 2.5rem;
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.75rem;
     text-align: center;
+    transition: all 0.5s ease;
+    border: 3px solid transparent;
 }
 
 .top-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
-    color: var(--secondary-text);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    opacity: 0.7;
 }
 
 .scoreboard, .question-info {
-    background: #ecf0f1;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    background: var(--bg-color);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-m);
+    box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
 }
 
-/* --- Display da Palavra em Cursiva --- */
+/* FIX: Added overflow control for long words/sentences */
 .word-area {
     padding: 1rem 0;
+    overflow-x: auto;
+    /* Custom scrollbar for aesthetics */
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) var(--bg-color);
+}
+
+/* For Webkit browsers like Chrome, Safari */
+.word-area::-webkit-scrollbar {
+  height: 8px;
+}
+.word-area::-webkit-scrollbar-track {
+  background: var(--bg-color);
+  border-radius: 4px;
+}
+.word-area::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 4px;
 }
 
 .word-display {
     font-family: var(--font-cursive);
-    font-size: clamp(3.5rem, 12vw, 6rem); /* Responsivo */
-    color: var(--primary-text);
-    min-height: 100px;
+    font-size: clamp(4rem, 13vw, 6.5rem);
+    color: var(--primary-color);
+    min-height: 110px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.3s ease-in-out, opacity 0.3s ease;
+    /* FIX: Prevents text from breaking into a new line */
+    white-space: nowrap;
+    padding: 0 1rem; /* Adds some space if scrolling is needed */
 }
 
 .word-display.changing {
@@ -100,59 +144,70 @@ body {
     opacity: 0;
 }
 
-/* --- Área de Input --- */
 .input-area {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 #answerInput {
     flex-grow: 1;
-    padding: 0.8rem 1rem;
-    border: 2px solid #bdc3c7;
-    border-radius: var(--border-radius);
-    font-size: 1.1rem;
+    padding: 1rem 1.2rem;
+    border: none;
+    border-radius: var(--radius-m);
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    background: var(--bg-color);
     outline: none;
-    transition: border-color 0.2s;
+    transition: box-shadow 0.2s;
+    box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
 }
 
 #answerInput:focus {
-    border-color: var(--accent-color);
+    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff, 0 0 0 2px var(--accent-color);
 }
 
 #submitBtn {
-    padding: 0.8rem 1.5rem;
+    padding: 1rem 1.5rem;
     font-size: 1.1rem;
     font-weight: bold;
     color: white;
     background-color: var(--accent-color);
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-m);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+    box-shadow: var(--dark-shadow);
 }
 
 #submitBtn:hover:not(:disabled) {
     background-color: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+#submitBtn:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: inset 2px 2px 5px #0062b8, inset -2px -2px 5px #00b6ff;
 }
 
 #submitBtn:disabled {
     background-color: #bdc3c7;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
-/* --- Feedback Visual --- */
 .feedback {
-    min-height: 40px;
-    padding: 0.5rem;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    font-weight: bold;
+    min-height: 48px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-m);
+    font-size: 1.1rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
+    background: var(--bg-color);
+    box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
 }
 
 .feedback.visible {
@@ -160,23 +215,21 @@ body {
 }
 
 .feedback.correct {
-    background-color: #eafaf1;
     color: var(--correct-color);
 }
 
 .feedback.incorrect {
-    background-color: #fbeae9;
     color: var(--incorrect-color);
 }
 
-/* --- Modal de Resultados --- */
 .result-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(40, 50, 70, 0.6);
+    backdrop-filter: blur(5px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -192,11 +245,11 @@ body {
 }
 
 .result-content {
-    background: var(--container-bg);
+    background: var(--bg-color);
     padding: 2.5rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-l);
     text-align: center;
-    box-shadow: var(--shadow);
+    box-shadow: var(--dark-shadow), var(--light-shadow);
     transform: scale(0.9);
     transition: transform 0.3s ease;
 }
@@ -207,13 +260,16 @@ body {
 
 #resultTitle {
     margin-bottom: 0.5rem;
-    font-size: 2rem;
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    transition: all 0.5s ease;
 }
 
 #resultText {
     margin-bottom: 1.5rem;
     font-size: 1.2rem;
-    color: var(--secondary-text);
+    color: var(--primary-color);
+    opacity: 0.8;
 }
 
 #restartBtn {
@@ -223,7 +279,7 @@ body {
     color: white;
     background-color: var(--accent-color);
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-m);
     cursor: pointer;
     transition: background-color 0.2s;
 }
@@ -232,9 +288,7 @@ body {
     background-color: var(--accent-hover);
 }
 
-
-/* --- Animação de Fogos de Artifício (CSS) --- */
-.fireworks {
+.fireworks, .confetti {
     position: fixed;
     top: 0;
     left: 0;
@@ -249,18 +303,26 @@ body {
     width: 5px;
     height: 5px;
     opacity: 0;
-    background: hsl(60, 100%, 50%); /* Cor inicial */
+    background: hsl(60, 100%, 50%);
     border-radius: 50%;
     animation: explode 1s ease-out forwards;
 }
 
 @keyframes explode {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--x), var(--y)) scale(0);
-        opacity: 0;
-    }
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+}
+
+.confetti .particle {
+    position: absolute;
+    width: 10px;
+    height: 20px;
+    background-color: #f00;
+    opacity: 0;
+    animation: fall 4s linear forwards;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-5vh) rotateZ(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotateZ(720deg); opacity: 0; }
 }

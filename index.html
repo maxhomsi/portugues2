@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aprenda Caligrafia com App do Papai!</title>
+    <title>Caligrafia Mágica</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>">
 </head>
 <body>
 
     <header class="app-header">
-      <h1>Vamos praticar Caligrafia ✍️</h1>
+      <h1>Caligrafia Mágica ✍️✨</h1>
     </header>
 
-    <main class="game-container">
+    <main class="game-container" id="gameContainer">
       <div class="top-row">
         <div class="scoreboard" id="scoreboard">Pontuação: 0/10</div>
         <div class="question-info" id="questionInfo">Pergunta 1 de 10</div>
@@ -25,7 +25,9 @@
 
       <div class="input-area">
         <input id="answerInput" type="text" placeholder="Escreva a palavra aqui..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-        <button id="submitBtn" aria-label="Enviar resposta">Enviar</button>
+        <button id="submitBtn" aria-label="Enviar resposta">
+            Enviar ✈️
+        </button>
       </div>
 
       <div id="feedback" class="feedback" aria-live="polite"></div>
@@ -35,12 +37,14 @@
       <div class="result-content" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
         <h2 id="resultTitle"></h2>
         <p id="resultText"></p>
-        <button id="restartBtn">Jogue Novamente</button>
+        <button id="restartBtn">
+            Jogar Novamente 🔄
+        </button>
       </div>
     </div>
     
     <div class="fireworks" id="fireworksContainer"></div>
-
+    <div class="confetti" id="confettiContainer"></div>
 
     <script src="wordList.js"></script>
     <script src="data.js"></script>

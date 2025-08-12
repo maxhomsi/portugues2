@@ -3,6 +3,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Referências aos Elementos do DOM ---
     const dom = {
+        body: document.body,
+        gameContainer: document.getElementById('gameContainer'),
         wordDisplay: document.getElementById('wordDisplay'),
         answerInput: document.getElementById('answerInput'),
         submitBtn: document.getElementById('submitBtn'),
@@ -14,39 +16,63 @@ document.addEventListener('DOMContentLoaded', () => {
         resultText: document.getElementById('resultText'),
         restartBtn: document.getElementById('restartBtn'),
         fireworksContainer: document.getElementById('fireworksContainer'),
+        confettiContainer: document.getElementById('confettiContainer'),
     };
 
-    // --- Configuração da Síntese de Voz ---
+    // --- Configuração de Áudio e Voz ---
     const synth = window.speechSynthesis;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = AudioContext ? new AudioContext() : null;
     let ptBrVoice = null;
     
     function loadVoices() {
+        if (!synth) return;
         const voices = synth.getVoices();
         ptBrVoice = voices.find(voice => voice.lang === 'pt-BR');
-        // Fallback para a primeira voz pt, caso 'pt-BR' não exista
         if (!ptBrVoice) {
             ptBrVoice = voices.find(voice => voice.lang.startsWith('pt'));
         }
     }
-    // As vozes são carregadas de forma assíncrona
-    synth.onvoiceschanged = loadVoices;
-    loadVoices();
+    if (synth) {
+      synth.onvoiceschanged = loadVoices;
+      loadVoices();
+    }
 
-    /**
-     * Fala o texto fornecido usando a voz pt-BR.
-     * @param {string} text - O texto a ser falado.
-     */
     function speak(text) {
-        if (synth.speaking) {
-            synth.cancel();
-        }
-        if (text !== '' && ptBrVoice) {
-            const utterThis = new SpeechSynthesisUtterance(text);
-            utterThis.voice = ptBrVoice;
-            utterThis.pitch = 1.1;
-            utterThis.rate = 0.9;
-            synth.speak(utterThis);
-        }
+        if (!synth || !ptBrVoice) return;
+        if (synth.speaking) synth.cancel();
+        const utterThis = new SpeechSynthesisUtterance(text);
+        utterThis.voice = ptBrVoice;
+        utterThis.pitch = 1.1;
+        utterThis.rate = 0.9;
+        synth.speak(utterThis);
+    }
+    
+    /**
+     * Toca um som de "tada" usando a Web Audio API.
+     */
+    function playTadaSound() {
+        if (!audioCtx) return;
+        const notes = [349.23, 440.00, 523.25, 698.46]; // F4, A4, C5, F5
+        let startTime = audioCtx.currentTime;
+
+        notes.forEach((freq, i) => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(freq, startTime);
+            
+            gainNode.gain.setValueAtTime(0.3, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.5);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.6);
+            startTime += 0.1;
+        });
     }
 
     /**
@@ -54,54 +80,39 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function renderQuestion() {
         const currentWordObject = GameData.getCurrentWord();
-        
-        // Animação de troca de palavra
         dom.wordDisplay.classList.add('changing');
 
         setTimeout(() => {
-            // Mostra a palavra em português
             dom.wordDisplay.textContent = currentWordObject.pt;
             dom.wordDisplay.classList.remove('changing');
-        }, 150); // Metade da transição
+        }, 150);
 
         dom.scoreboard.textContent = `Pontuação: ${GameData.score}/${GameData.roundWordsCount}`;
         dom.questionInfo.textContent = `Pergunta ${GameData.currentIndex + 1} de ${GameData.roundWordsCount}`;
-
-        // Limpa o estado da UI
         dom.answerInput.value = '';
         dom.answerInput.disabled = false;
         dom.submitBtn.disabled = false;
         dom.feedback.textContent = '';
         dom.feedback.className = 'feedback';
-
         dom.answerInput.focus();
     }
     
-    /**
-     * Normaliza a entrada do usuário para comparação.
-     * @param {string} input - A string de entrada.
-     * @returns {string} A string normalizada em minúsculas.
-     */
     function normalizeInput(input) {
         return input.trim().toLowerCase().replace(/\s+/g, ' ');
     }
     
-    /**
-     * Manipula o envio da resposta pelo usuário.
-     */
     function handleSubmit() {
         const userAnswer = normalizeInput(dom.answerInput.value);
+        if (userAnswer === '') return;
+        
         const currentWordObject = GameData.getCurrentWord();
         const correctAnswer = currentWordObject.pt;
         const translation = currentWordObject.en;
 
-        if (userAnswer === '') return;
-
         dom.answerInput.disabled = true;
         dom.submitBtn.disabled = true;
-
         dom.feedback.classList.add('visible');
-        // Compara a resposta do usuário (em minúsculas) com a resposta correta (convertida para minúsculas)
+        
         if (userAnswer === correctAnswer.toLowerCase()) {
             GameData.score++;
             dom.feedback.textContent = `✅ Certo! Tradução: ${translation}`;
@@ -113,13 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         dom.scoreboard.textContent = `Pontuação: ${GameData.score}/${GameData.roundWordsCount}`;
-
-        setTimeout(advanceOrFinish, 2500); // Aumentado o tempo para dar chance de ler a tradução
+        setTimeout(advanceOrFinish, 2500);
     }
 
-    /**
-     * Avança para a próxima pergunta ou finaliza o jogo.
-     */
     function advanceOrFinish() {
         GameData.currentIndex++;
         if (GameData.currentIndex < GameData.roundWordsCount) {
@@ -129,17 +136,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Exibe o modal de resultados com a pontuação final.
-     */
     function showResultModal() {
         const score = GameData.score;
         let title = '';
         let text = `Sua pontuação final foi: ${score} de ${GameData.roundWordsCount}`;
 
         if (score === GameData.roundWordsCount) {
-            title = '🎉 PARABÉNS!!!!!! 🎉';
-            triggerFireworks();
+            title = '🏆 PARABÉNS! 🏆';
+            text = 'Você acertou todas! Que incrível! ' + text;
+            triggerGrandCelebration();
         } else if (score >= 5) {
             title = 'Muito bem!';
             text = 'Você está quase lá! Continue praticando. ' + text;
@@ -153,53 +158,77 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.resultModal.hidden = false;
         dom.restartBtn.focus();
     }
+    
+    /**
+     * Aciona todos os efeitos de celebração para uma pontuação perfeita.
+     */
+    function triggerGrandCelebration() {
+        dom.body.classList.add('celebration-mode');
+        dom.gameContainer.classList.add('celebration-mode');
+        dom.resultTitle.classList.add('celebration-mode');
+        triggerFireworks();
+        triggerConfetti();
+        playTadaSound();
+    }
 
     /**
-     * Inicia uma nova rodada do jogo.
+     * Reinicia uma nova rodada do jogo e limpa os efeitos de celebração.
      */
     function restartRound() {
         GameData.resetRound();
         dom.resultModal.hidden = true;
+        
+        // Limpa os efeitos visuais da celebração
+        dom.body.classList.remove('celebration-mode');
+        dom.gameContainer.classList.remove('celebration-mode');
+        dom.resultTitle.classList.remove('celebration-mode');
+        dom.fireworksContainer.innerHTML = '';
+        dom.confettiContainer.innerHTML = '';
+
         renderQuestion();
     }
 
-    /**
-     * Dispara a animação de fogos de artifício em CSS.
-     */
     function triggerFireworks() {
-        const fireworksCount = 30; // Número de "explosões"
-        const container = dom.fireworksContainer;
+        const count = 30, container = dom.fireworksContainer;
         container.innerHTML = '';
-
-        for (let i = 0; i < fireworksCount; i++) {
+        for (let i = 0; i < count; i++) {
             setTimeout(() => {
                 const explosion = document.createElement('div');
                 explosion.style.left = `${Math.random() * 100}%`;
                 explosion.style.top = `${Math.random() * 100}%`;
-
-                for (let j = 0; j < 25; j++) { // Partículas por explosão
-                    const particle = document.createElement('div');
-                    particle.classList.add('particle');
-                    particle.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
-                    particle.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
-                    particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                    explosion.appendChild(particle);
+                for (let j = 0; j < 25; j++) {
+                    const p = document.createElement('div');
+                    p.classList.add('particle');
+                    p.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
+                    p.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
+                    p.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    explosion.appendChild(p);
                 }
                 container.appendChild(explosion);
-                
-                // Remove a explosão do DOM após a animação
                 setTimeout(() => explosion.remove(), 1000);
-
             }, Math.random() * 1500);
+        }
+    }
+    
+    function triggerConfetti() {
+        const count = 100, container = dom.confettiContainer;
+        const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590'];
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            p.style.animationDelay = `${Math.random() * 4}s`;
+            p.style.transform = `rotate(${Math.random() * 360}deg)`;
+            container.appendChild(p);
         }
     }
 
     // --- Vinculação de Eventos ---
     dom.submitBtn.addEventListener('click', handleSubmit);
     dom.answerInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleSubmit();
-        }
+        if (e.key === 'Enter') handleSubmit();
     });
     dom.restartBtn.addEventListener('click', restartRound);
 
