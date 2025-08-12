@@ -53,13 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
      * Renderiza a questão atual na tela.
      */
     function renderQuestion() {
-        const currentWord = GameData.getCurrentWord();
+        const currentWordObject = GameData.getCurrentWord();
         
         // Animação de troca de palavra
         dom.wordDisplay.classList.add('changing');
 
         setTimeout(() => {
-            dom.wordDisplay.textContent = currentWord;
+            // Mostra a palavra em português
+            dom.wordDisplay.textContent = currentWordObject.pt;
             dom.wordDisplay.classList.remove('changing');
         }, 150); // Metade da transição
 
@@ -79,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Normaliza a entrada do usuário para comparação.
      * @param {string} input - A string de entrada.
-     * @returns {string} A string normalizada.
+     * @returns {string} A string normalizada em minúsculas.
      */
     function normalizeInput(input) {
         return input.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -90,7 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function handleSubmit() {
         const userAnswer = normalizeInput(dom.answerInput.value);
-        const correctAnswer = GameData.getCurrentWord();
+        const currentWordObject = GameData.getCurrentWord();
+        const correctAnswer = currentWordObject.pt;
+        const translation = currentWordObject.en;
 
         if (userAnswer === '') return;
 
@@ -98,19 +101,20 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.submitBtn.disabled = true;
 
         dom.feedback.classList.add('visible');
-        if (userAnswer === correctAnswer) {
+        // Compara a resposta do usuário (em minúsculas) com a resposta correta (convertida para minúsculas)
+        if (userAnswer === correctAnswer.toLowerCase()) {
             GameData.score++;
-            dom.feedback.textContent = '✅ Certo!';
+            dom.feedback.textContent = `✅ Certo! Tradução: ${translation}`;
             dom.feedback.classList.add('correct');
             speak(correctAnswer);
         } else {
-            dom.feedback.textContent = `❌ Errado. A palavra era: ${correctAnswer}`;
+            dom.feedback.textContent = `❌ Errado. A palavra era: ${correctAnswer} (Tradução: ${translation})`;
             dom.feedback.classList.add('incorrect');
         }
         
         dom.scoreboard.textContent = `Pontuação: ${GameData.score}/${GameData.roundWordsCount}`;
 
-        setTimeout(advanceOrFinish, 1500);
+        setTimeout(advanceOrFinish, 2500); // Aumentado o tempo para dar chance de ler a tradução
     }
 
     /**
