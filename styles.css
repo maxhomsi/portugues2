@@ -1,17 +1,17 @@
 /* --- GERAL E VARIÁVEIS DE DESIGN --- */
 :root {
-    --bg-color: #e0e5ec;
-    --primary-color: #4a5a70;
-    --accent-color: #008cff;
-    --accent-hover: #007ae6;
+    --bg-color-notepad: #fdfdf2;
+    --line-color: #d4e6f1;
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
     --correct-color: #28a745;
     --incorrect-color: #dc3545;
-    --font-ui: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-ui: 'Helvetica Neue', Arial, sans-serif;
     --font-cursive: 'DancingScriptLocal', "Brush Script MT", "Snell Roundhand", cursive;
-    --radius-l: 20px;
-    --radius-m: 12px;
-    --light-shadow: -10px -10px 20px #ffffff;
-    --dark-shadow: 10px 10px 20px #a3b1c6;
+    --radius-l: 15px;
+    --radius-m: 10px;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* --- FONT LOADING FROM LOCAL FILE --- */
@@ -31,7 +31,13 @@
 
 body {
     font-family: var(--font-ui);
-    background-color: var(--bg-color);
+    /* Lined-paper background image created with gradients */
+    background-color: var(--bg-color-notepad);
+    background-image:
+        linear-gradient(to right, rgba(230, 126, 34, 0.5) 2px, transparent 2px),
+        linear-gradient(to bottom, var(--line-color) 1px, transparent 1px);
+    background-size: 100% 2.5em, 100% 2.5em;
+    background-position: 2.5em 0, 0 0;
     color: var(--primary-color);
     display: flex;
     flex-direction: column;
@@ -40,21 +46,21 @@ body {
     min-height: 100vh;
     padding: 20px;
     overflow: hidden;
-    transition: background-color 0.5s ease;
+    position: relative;
 }
 
 /* --- Golden Celebration Mode --- */
 body.celebration-mode {
-    background: radial-gradient(ellipse at bottom, #fffde7, #e3e8ee);
+    background-color: #fffde7;
 }
 
 .game-container.celebration-mode {
     border: 3px solid #ffd700;
-    box-shadow: 0 0 35px rgba(255, 215, 0, 0.6), var(--light-shadow), var(--dark-shadow);
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.6);
 }
 
 #resultTitle.celebration-mode {
-    color: #c5a100;
+    color: #e67e22;
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
 }
 
@@ -66,16 +72,16 @@ body.celebration-mode {
 }
 
 .app-header h1 {
-    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-size: clamp(2.2rem, 5vw, 3rem);
     font-weight: 700;
     color: var(--primary-color);
-    opacity: 0.8;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
 }
 
 .game-container {
-    background: var(--bg-color);
+    background-color: var(--paper-color);
     border-radius: var(--radius-l);
-    box-shadow: var(--dark-shadow), var(--light-shadow);
+    box-shadow: var(--shadow);
     padding: 2.5rem;
     width: 100%;
     max-width: 650px;
@@ -84,7 +90,7 @@ body.celebration-mode {
     gap: 1.75rem;
     text-align: center;
     transition: all 0.5s ease;
-    border: 3px solid transparent;
+    border: 1px solid #fff;
 }
 
 .top-row {
@@ -93,14 +99,14 @@ body.celebration-mode {
     font-size: 1rem;
     font-weight: 600;
     color: var(--primary-color);
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
 .scoreboard, .question-info {
-    background: var(--bg-color);
+    background: #f0f4f8;
     padding: 0.6rem 1.2rem;
     border-radius: var(--radius-m);
-    box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
+    border: 1px solid #dbe4f0;
 }
 
 .word-area {
@@ -109,7 +115,8 @@ body.celebration-mode {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Hide any minor overflow during resizing */
+    overflow: hidden;
+    border-bottom: 2px dashed var(--line-color);
 }
 
 .word-display {
@@ -119,6 +126,11 @@ body.celebration-mode {
     transition: transform 0.3s ease-in-out, opacity 0.3s ease, font-size 0.3s ease;
     white-space: nowrap;
     padding: 0 5px;
+    /* Prevents text selection and copy */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .word-display.changing {
@@ -134,18 +146,19 @@ body.celebration-mode {
 #answerInput {
     flex-grow: 1;
     padding: 1rem 1.2rem;
-    border: none;
+    border: 2px solid #dde8f0;
     border-radius: var(--radius-m);
     font-size: 1.2rem;
     color: var(--primary-color);
-    background: var(--bg-color);
+    background-color: #f8fafc;
     outline: none;
-    transition: box-shadow 0.2s;
-    box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+    transition: all 0.2s;
 }
 
 #answerInput:focus {
-    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff, 0 0 0 2px var(--accent-color);
+    border-color: var(--accent-color);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
 }
 
 #submitBtn {
@@ -157,8 +170,8 @@ body.celebration-mode {
     border: none;
     border-radius: var(--radius-m);
     cursor: pointer;
-    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
-    box-shadow: var(--dark-shadow);
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 #submitBtn:hover:not(:disabled) {
@@ -168,7 +181,6 @@ body.celebration-mode {
 
 #submitBtn:active:not(:disabled) {
     transform: translateY(1px);
-    box-shadow: inset 2px 2px 5px #0062b8, inset -2px -2px 5px #00b6ff;
 }
 
 #submitBtn:disabled {
@@ -188,8 +200,8 @@ body.celebration-mode {
     justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
-    background: var(--bg-color);
-    box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+    background-color: #eaf2f8;
+    border: 1px solid #d4e6f1;
 }
 
 .feedback.visible {
@@ -198,10 +210,14 @@ body.celebration-mode {
 
 .feedback.correct {
     color: var(--correct-color);
+    background-color: #eafaf1;
+    border-color: #a3d9b1;
 }
 
 .feedback.incorrect {
     color: var(--incorrect-color);
+    background-color: #fbeae9;
+    border-color: #f5b7b1;
 }
 
 .result-modal {
@@ -227,13 +243,14 @@ body.celebration-mode {
 }
 
 .result-content {
-    background: var(--bg-color);
+    background: #fff;
     padding: 2.5rem;
     border-radius: var(--radius-l);
     text-align: center;
-    box-shadow: var(--dark-shadow), var(--light-shadow);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     transform: scale(0.9);
     transition: transform 0.3s ease;
+    border: 1px solid #ddd;
 }
 
 .result-modal:not([hidden]) .result-content {
@@ -331,4 +348,8 @@ body.celebration-mode {
 @keyframes pop-in {
     0% { transform: scale(0); }
     100% { transform: scale(1); }
+}
+.celebration-characters img:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
 }
